@@ -1,8 +1,44 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  const logger = new Logger('Bootstrap');
+  const globalPrefix = 'api';
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger({
+      json: true,
+      colors: true,
+    }),
+  });
+  const configService = app.get(ConfigService);
+  const env = configService.get<string>('NODE_ENV', 'development');
+  const port = configService.get<number>('PORT', 3000);
+
+  app.enableCors({
+    origin:
+      env === 'production'
+        ? configService.get<string>('CORS_ORIGIN', '')
+        : ['http://localhost:3000'],
+  });
+  app.setGlobalPrefix(globalPrefix);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  await app.listen(port);
+
+  logger.log(
+    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
+  );
+  logger.log(`🌱 Environment: ${env}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  Logger.error('❌ Failed to start application', error);
+  process.exit(1);
+});
