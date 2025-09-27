@@ -1,29 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma, User, Role } from 'generated/prisma';
-import * as argon2 from 'argon2';
-import { ForbiddenException } from '@nestjs/common';
+import { Prisma, User } from 'generated/prisma';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userData: CreateUserDto): Promise<User> {
-    if (userData.role && userData.role === Role.ADMIN) {
-      throw new ForbiddenException(`Cannot self-assign ${Role.ADMIN} role`);
-    }
-
-    const hashedPassword = await argon2.hash(userData.password);
-
-    return this.prisma.user.create({
-      data: {
-        ...userData,
-        password: hashedPassword,
-        role: Role.USER,
-      },
-    });
+  async create(args: Prisma.UserCreateArgs): Promise<User> {
+    return await this.prisma.user.create(args);
   }
 
   async findAll(where?: Prisma.UserWhereInput): Promise<Array<User>> {
