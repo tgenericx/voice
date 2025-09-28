@@ -1,35 +1,35 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UserDto } from 'src/users/dto/user.dto';
-import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { AuthPayload } from './dto/auth.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+  @Post('register')
+  create(@Body() createUserDto: CreateUserDto): Promise<AuthPayload> {
     return this.authService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  login(@Body() loginDto: LoginDto): Promise<AuthPayload> {
+    return this.authService.login(loginDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  refresh(@Body('refreshToken') token: string): Promise<AuthPayload> {
+    return this.authService.refreshToken(token);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('logout')
+  logout(@Body('refreshToken') token: string): Promise<void> {
+    return this.authService.logout(token);
   }
 }
