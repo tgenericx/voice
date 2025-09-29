@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -6,10 +6,14 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { findRoot } from 'src/utils/find-root';
 import { AccessTokenPayload, AuthenticatedUser } from 'src/auth/dto/auth.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {
     const root = findRoot(process.cwd());
     let secretOrKey: string;
 
@@ -37,10 +41,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: AccessTokenPayload): AuthenticatedUser {
+  async validate(payload: AccessTokenPayload): Promise<AuthenticatedUser> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: payload.sub,
+      },
+      select: {
+        id: true,
+        role: true,
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
     return {
-      userId: payload.sub,
-      role: payload.role,
+      userId: user.id,
+      role: user.role,
     };
   }
 }
