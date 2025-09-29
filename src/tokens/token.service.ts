@@ -18,7 +18,7 @@ export class TokenService {
     try {
       const payload: AccessTokenPayload = {
         sub: user.id,
-        roles: user.role,
+        role: user.role,
       };
       return this.jwt.sign(payload);
     } catch (error) {
