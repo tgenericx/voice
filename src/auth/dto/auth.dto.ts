@@ -8,7 +8,7 @@ export class AuthPayload {
 
 export class AccessTokenPayload {
   sub: UserDto['id'];
-  roles: UserDto['role'];
+  role: UserDto['role'];
 }
 
 export type VerifiedToken<T = unknown> = {
@@ -18,5 +18,5 @@ export type VerifiedToken<T = unknown> = {
 
 export class AuthenticatedUser {
   userId: UserDto['id'];
-  roles: UserDto['role'];
+  role: UserDto['role'];
 }
