@@ -14,10 +14,10 @@ export class SwaggerConfigModule {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Enter JWT token',
+          description: 'Enter JWT Access token',
           in: 'header',
         },
-        'JWT-auth',
+        'Bearer',
       )
       .build();
 
