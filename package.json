@@ -23,6 +23,7 @@
     "db:deploy": "pnpm exec prisma migrate deploy",
     "db:studio": "pnpm exec prisma studio"
   },
+  "packageManager": "pnpm@10.17.0",
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
