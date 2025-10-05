@@ -31,20 +31,3 @@ jobs:
 
       - name: Build the project
         run: pnpm run build
-
-      # Upload built application
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-          retention-days: 7
-
-      # Upload prisma client 
-      - name: Upload prisma client
-        uses: actions/upload-artifact@v4
-        with:
-          name: prisma
-          path: node_modules/.prisma
-          retention-days: 7
-
