@@ -24,16 +24,15 @@ FROM node:lts-alpine AS runner
 WORKDIR /app
 RUN npm i -g pnpm
 
-# Copy only what’s needed for runtime
+# Copy runtime essentials
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/dist ./dist
-
-# Install only production dependencies
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/generated ./generated
+
+# Install only production deps
 RUN pnpm install --prod --frozen-lockfile
 
 EXPOSE 3000
-
-# Run without auto-migrating each time
 CMD ["pnpm", "run", "start:prod"]
