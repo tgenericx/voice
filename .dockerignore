@@ -19,6 +19,3 @@ src/**/*/*.test.ts
 # Misc
 README.md
 eslint.config.mjs
-tsconfig.json
-tsconfig.build.json
-nest-cli.json
