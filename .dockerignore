@@ -1,0 +1,24 @@
+# Tests
+test
+__tests__/
+*.spec.ts
+*.test.ts
+src/**/*/*.spec.ts
+src/**/*/*.test.ts
+
+# Editor / OS files
+.DS_Store
+.vscode
+.idea
+*.swp
+
+# Git & CI/CD
+.gitignore
+.github
+
+# Misc
+README.md
+eslint.config.mjs
+tsconfig.json
+tsconfig.build.json
+nest-cli.json
