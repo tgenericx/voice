@@ -20,19 +20,24 @@ enum Role {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  role       Role     @default(USER)
+  id         String  @id @default(cuid())
+  role       Role    @default(USER)
   avatar     String?
-  matricNo   String   @unique
+  email      String  @unique
+  matricNo   String  @unique
   firstName  String
   lastName   String
   department String
   password   String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   complaints    Complaint[]
   refreshTokens RefreshToken[]
+  messages      Message[]
+  attachments   Attachment[]
+  notifications Notification[]
 }
 
 model RefreshToken {
@@ -47,12 +52,70 @@ model RefreshToken {
 }
 
 model Complaint {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   title       String
   description String
-  status      String
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      ComplaintStatus   @default(SUBMITTED)
+  category    ComplaintCategory
+  priority    ComplaintPriority
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  student     User              @relation(fields: [studentId], references: [id])
+  studentId   String
+  attachments Attachment[]
+  messages    Message[]
+  timeline    Json
+}
+
+enum ComplaintStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  RESPONDED
+  RESOLVED
+}
+
+enum ComplaintCategory {
+  TECHNICAL_ISSUE
+  ACADEMIC_POLICY
+  FACULTY_BEHAVIOR
+  GRADING_DISPUTE
+  FACILITY_ISSUE
+  OTHER
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  fileName     String
+  fileUrl      String
+  fileSize     Int
+  uploadedAt   DateTime   @default(now())
+  uploadedBy   User       @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  Complaint    Complaint? @relation(fields: [complaintId], references: [id])
+  complaintId  String?
+}
+
+model Message {
+  id          String     @id @default(cuid())
+  content     String
+  sender      User       @relation(fields: [senderId], references: [id])
+  senderId    String
+  createdAt   DateTime   @default(now())
+  Complaint   Complaint? @relation(fields: [complaintId], references: [id])
+  complaintId String?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
