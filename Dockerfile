@@ -9,7 +9,7 @@ RUN npm i -g pnpm && pnpm install --frozen-lockfile
 
 # Copy prisma schema & generate client
 COPY prisma ./prisma
-RUN pnpm run prisma:generate
+RUN pnpm run db:generate
 
 # Copy the rest of the project
 COPY . .
