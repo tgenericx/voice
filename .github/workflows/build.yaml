@@ -32,3 +32,8 @@ jobs:
 
       - name: Build the project
         run: pnpm run build
+
+      - name: Run database migrations
+        run: pnpm run db:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
