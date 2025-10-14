@@ -1,5 +1,6 @@
 import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { IsEmail } from 'class-validator';
 import { $Enums, User } from 'generated/prisma';
 
 export class UserDto implements User {
@@ -10,6 +11,9 @@ export class UserDto implements User {
   firstName: string;
   lastName: string;
   department: string;
+
+  @IsEmail()
+  email: string;
 
   @ApiHideProperty()
   @Exclude()
