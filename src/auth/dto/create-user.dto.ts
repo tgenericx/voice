@@ -1,5 +1,6 @@
 import { $Enums } from 'generated/prisma';
 import {
+  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -9,6 +10,9 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
   @IsString()
   @IsNotEmpty()
   @Matches(/^[A-Z]{3}\/\d{4}\/\d{3}$/, {
