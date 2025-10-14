@@ -34,7 +34,7 @@ export class AuthService {
       data: {
         ...userData,
         password: hashedPassword,
-        role: userData.role ? userData.role : Role.USER,
+        role: userData.role ? userData.role : Role.STUDENT,
       },
     });
     const accessToken = this.tokenService.generateAccessToken(user);

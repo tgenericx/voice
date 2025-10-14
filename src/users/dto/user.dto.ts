@@ -21,4 +21,5 @@ export class UserDto implements User {
 
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
