@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TokensModule } from './tokens/tokens.module';
+import { ComplaintsModule } from './complaints/complaints.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TokensModule } from './tokens/tokens.module';
     UsersModule,
     AuthModule,
     TokensModule,
+    ComplaintsModule,
   ],
   providers: [
     {
