@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateComplaintDto } from './dto/update-complaint.dto';
-import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateComplaintDto } from './dto/create-complaint.dto';
+import { UpdateComplaintDto } from './dto/update-complaint.dto';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
-import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class ComplaintsService {
@@ -13,27 +12,77 @@ export class ComplaintsService {
     const hasAttachments =
       Array.isArray(data.attachments) && data.attachments.length > 0;
 
-    const complaintData: Prisma.ComplaintCreateInput = {
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      priority: data.priority,
-      madeBy: { connect: { id: user.userId } },
-    };
+    return this.prisma.$transaction(async (tx) => {
+      const complaint = await tx.complaint.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          priority: data.priority,
+          madeBy: { connect: { id: user.userId } },
+        },
+      });
 
-    if (hasAttachments) {
-      complaintData.attachments = {
-        create: data.attachments?.map((attachment) => ({
-          fileName: attachment.fileName,
-          fileUrl: attachment.fileUrl,
-          fileSize: attachment.fileSize,
-          uploadedBy: { connect: { id: user.userId } },
-        })),
-      };
-    }
+      if (hasAttachments) {
+        await tx.attachment.createMany({
+          data: data.attachments!.map((a) => ({
+            fileName: a.fileName,
+            fileUrl: a.fileUrl,
+            fileSize: a.fileSize,
+            uploadedById: user.userId,
+            complaintId: complaint.id,
+          })),
+        });
+      }
 
-    return await this.prisma.complaint.create({
-      data: complaintData,
+      return tx.complaint.findUnique({
+        where: { id: complaint.id },
+        include: {
+          attachments: true,
+          madeBy: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
+        },
+      });
+    });
+  }
+
+  async update(
+    id: string,
+    updateComplaintDto: UpdateComplaintDto,
+    user: AuthenticatedUser,
+  ) {
+    const { attachments, ...data } = updateComplaintDto;
+    const hasNewAttachments =
+      Array.isArray(attachments) && attachments.length > 0;
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.complaint.update({
+        where: { id },
+        data,
+      });
+
+      if (hasNewAttachments) {
+        await tx.attachment.createMany({
+          data: attachments.map((a) => ({
+            fileName: a.fileName,
+            fileUrl: a.fileUrl,
+            fileSize: a.fileSize,
+            uploadedById: user.userId,
+            complaintId: id,
+          })),
+        });
+      }
+
+      return tx.complaint.findUnique({
+        where: { id },
+        include: { attachments: true, madeBy: true },
+      });
+    });
+  }
+
+  findAll() {
+    return this.prisma.complaint.findMany({
       include: {
         attachments: true,
         madeBy: {
@@ -43,19 +92,19 @@ export class ComplaintsService {
     });
   }
 
-  findAll() {
-    return `This action returns all complaints`;
+  findOne(id: string) {
+    return this.prisma.complaint.findUnique({
+      where: { id },
+      include: {
+        attachments: true,
+        madeBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} complaint`;
-  }
-
-  update(id: number, updateComplaintDto: UpdateComplaintDto) {
-    return `This action updates a #${id} complaint`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} complaint`;
+  remove(id: string) {
+    return this.prisma.complaint.delete({ where: { id } });
   }
 }
