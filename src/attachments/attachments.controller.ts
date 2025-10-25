@@ -1,15 +1,25 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Delete,
+  ForbiddenException,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AttachmentsService } from './attachments.service';
-import { CreateAttachmentDto } from './dto/create-attachment.dto';
-import { UpdateAttachmentDto } from './dto/update-attachment.dto';
+import { JwtAuthGuard } from 'src/utils/guards';
 
+@UseGuards(JwtAuthGuard)
 @Controller('attachments')
 export class AttachmentsController {
   constructor(private readonly attachmentsService: AttachmentsService) {}
 
   @Post()
-  create(@Body() createAttachmentDto: CreateAttachmentDto) {
-    return this.attachmentsService.create(createAttachmentDto);
+  create() {
+    throw new ForbiddenException(
+      'Attachments can only be created with complaints',
+    );
   }
 
   @Get()
@@ -19,16 +29,11 @@ export class AttachmentsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.attachmentsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAttachmentDto: UpdateAttachmentDto) {
-    return this.attachmentsService.update(+id, updateAttachmentDto);
+    return this.attachmentsService.findOne(id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.attachmentsService.remove(+id);
+    return this.attachmentsService.remove(id);
   }
 }
