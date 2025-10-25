@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
+import { Role } from 'generated/prisma';
 
 @Injectable()
 export class ComplaintsService {
@@ -93,14 +94,18 @@ export class ComplaintsService {
     });
   }
 
-  findAll() {
+  async findAll(user: AuthenticatedUser) {
+    const isAdmin = user.role === Role.ADMIN;
+
     return this.prisma.complaint.findMany({
+      where: isAdmin ? {} : { madeById: user.userId },
       include: {
         attachments: true,
         madeBy: {
           select: { id: true, firstName: true, lastName: true, email: true },
         },
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

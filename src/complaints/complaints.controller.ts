@@ -34,11 +34,13 @@ export class ComplaintsController {
   }
 
   @Get()
-  async findAll(): Promise<
+  async findAll(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<
     ApiResponse<AwaitedMethodReturn<typeof this.complaintsService.findAll>>
   > {
     const message = 'Complaints retrieved successfully';
-    const data = await this.complaintsService.findAll();
+    const data = await this.complaintsService.findAll(user);
     return { message, data };
   }
 

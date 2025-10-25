@@ -6,14 +6,23 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateAttachmentDto } from './dto/update-attachment.dto';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
+import { Role } from 'generated/prisma';
 
 @Injectable()
 export class AttachmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  async findAll(user: AuthenticatedUser) {
+    const isAdmin = user.role === Role.ADMIN;
+
     return this.prisma.attachment.findMany({
-      include: { uploadedBy: true },
+      where: isAdmin ? {} : { uploadedById: user.userId },
+      include: {
+        uploadedBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
+      orderBy: { uploadedAt: 'desc' },
     });
   }
 
