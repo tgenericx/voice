@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TokensModule } from './tokens/tokens.module';
 import { ComplaintsModule } from './complaints/complaints.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
     AuthModule,
     TokensModule,
     ComplaintsModule,
+    AttachmentsModule,
   ],
   providers: [
     {
