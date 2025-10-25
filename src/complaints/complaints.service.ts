@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
@@ -52,6 +56,14 @@ export class ComplaintsService {
     updateComplaintDto: UpdateComplaintDto,
     user: AuthenticatedUser,
   ) {
+    const complaint = await this.prisma.complaint.findUnique({
+      where: { id },
+    });
+    if (!complaint) throw new NotFoundException('Complaint not found');
+
+    if (complaint.madeById !== user.userId)
+      throw new ForbiddenException('You can only update your own complaints');
+
     const { attachments, ...data } = updateComplaintDto;
     const hasNewAttachments =
       Array.isArray(attachments) && attachments.length > 0;
@@ -104,7 +116,13 @@ export class ComplaintsService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string, user: AuthenticatedUser) {
+    const complaint = await this.prisma.complaint.findUnique({ where: { id } });
+    if (!complaint) throw new NotFoundException('Complaint not found');
+
+    if (complaint.madeById !== user.userId)
+      throw new ForbiddenException('You can only delete your own complaints');
+
     return this.prisma.complaint.delete({ where: { id } });
   }
 }

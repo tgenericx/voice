@@ -57,7 +57,7 @@ export class ComplaintsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.complaintsService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.complaintsService.remove(id, user);
   }
 }
