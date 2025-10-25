@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { AttachmentsService } from './attachments.service';
 import { JwtAuthGuard } from 'src/utils/guards';
+import { CurrentUser } from 'src/utils/decorators';
+import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('attachments')
@@ -33,7 +35,7 @@ export class AttachmentsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attachmentsService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.attachmentsService.remove(id, user);
   }
 }
