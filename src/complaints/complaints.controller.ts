@@ -12,7 +12,7 @@ import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
 import { CurrentUser } from 'src/utils/decorators';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
-import { ApiResponse, MethodReturn } from 'src/common/types';
+import { ApiResponse, AwaitedMethodReturn } from 'src/common/types';
 
 @Controller('complaints')
 export class ComplaintsController {
@@ -22,7 +22,9 @@ export class ComplaintsController {
   async create(
     @Body() createComplaintDto: CreateComplaintDto,
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<ApiResponse<MethodReturn<typeof this.complaintsService.create>>> {
+  ): Promise<
+    ApiResponse<AwaitedMethodReturn<typeof this.complaintsService.create>>
+  > {
     const message = 'Complaint issued successfully';
     const data = await this.complaintsService.create(createComplaintDto, user);
     return { message, data };
