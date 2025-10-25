@@ -27,18 +27,6 @@ export class ComplaintsController {
     const data = await this.complaintsService.create(createComplaintDto, user);
     return { message, data };
   }
-  //
-  // @Post()
-  // async create(
-  //   @Body() createComplaintDto: CreateComplaintDto,
-  //   @Cur() user: AuthenticatedUser,
-  // ) {
-  //   const message = 'Complaint issued successfully';
-  //   return {
-  //     message,
-  //     data: await this.complaintsService.create(createComplaintDto, user),
-  //   };
-  // }
 
   @Get()
   findAll() {
