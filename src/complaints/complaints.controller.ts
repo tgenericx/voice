@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ComplaintsService } from './complaints.service';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
@@ -13,7 +14,9 @@ import { UpdateComplaintDto } from './dto/update-complaint.dto';
 import { CurrentUser } from 'src/utils/decorators';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
 import { ApiResponse, AwaitedMethodReturn } from 'src/common/types';
+import { JwtAuthGuard } from 'src/utils/guards';
 
+@UseGuards(JwtAuthGuard)
 @Controller('complaints')
 export class ComplaintsController {
   constructor(private readonly complaintsService: ComplaintsService) {}
@@ -31,25 +34,30 @@ export class ComplaintsController {
   }
 
   @Get()
-  findAll() {
-    return this.complaintsService.findAll();
+  async findAll(): Promise<
+    ApiResponse<AwaitedMethodReturn<typeof this.complaintsService.findAll>>
+  > {
+    const message = 'Complaints retrieved successfully';
+    const data = await this.complaintsService.findAll();
+    return { message, data };
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.complaintsService.findOne(+id);
+    return this.complaintsService.findOne(id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateComplaintDto: UpdateComplaintDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.complaintsService.update(+id, updateComplaintDto);
+    return this.complaintsService.update(id, updateComplaintDto, user);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.complaintsService.remove(+id);
+    return this.complaintsService.remove(id);
   }
 }
