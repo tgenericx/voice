@@ -1,9 +1,13 @@
 import { $Enums } from 'generated/prisma';
 import { CreateAttachmentDto } from 'src/attachments/dto/create-attachment.dto';
-
-import { $Enums } from 'generated/prisma';
-import { CreateAttachmentDto } from 'src/attachments/dto/create-attachment.dto';
-import { IsArray, IsEnum, IsOptional, IsString, Length, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Length,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateComplaintDto {
