@@ -12,18 +12,33 @@ import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
 import { CurrentUser } from 'src/utils/decorators';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
+import { ApiResponse, MethodReturn } from 'src/common/types';
 
 @Controller('complaints')
 export class ComplaintsController {
   constructor(private readonly complaintsService: ComplaintsService) {}
 
   @Post()
-  create(
+  async create(
     @Body() createComplaintDto: CreateComplaintDto,
-    @CurrentUser user: AuthenticatedUser,
-  ) {
-    return this.complaintsService.create(createComplaintDto);
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<ApiResponse<MethodReturn<typeof this.complaintsService.create>>> {
+    const message = 'Complaint issued successfully';
+    const data = await this.complaintsService.create(createComplaintDto, user);
+    return { message, data };
   }
+  //
+  // @Post()
+  // async create(
+  //   @Body() createComplaintDto: CreateComplaintDto,
+  //   @Cur() user: AuthenticatedUser,
+  // ) {
+  //   const message = 'Complaint issued successfully';
+  //   return {
+  //     message,
+  //     data: await this.complaintsService.create(createComplaintDto, user),
+  //   };
+  // }
 
   @Get()
   findAll() {

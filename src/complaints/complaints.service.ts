@@ -1,11 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { CreateComplaintDto } from './dto/create-complaint.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
+import { CreateComplaintDto } from './dto/create-complaint.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
 
 @Injectable()
 export class ComplaintsService {
-  create(createComplaintDto: CreateComplaintDto) {
-    return 'This action adds a new complaint';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(data: CreateComplaintDto, user: AuthenticatedUser) {
+    return await this.prisma.complaint.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        priority: data.priority,
+        madeBy: { connect: { id: user.userId } },
+        attachments: {
+          create:
+            data.attachments?.map((attachment) => ({
+              fileName: attachment.fileName,
+              fileUrl: attachment.fileUrl,
+              fileSize: attachment.fileSize,
+              uploadedBy: { connect: { id: user.userId } },
+            })) ?? [],
+        },
+      },
+      include: {
+        attachments: true,
+        madeBy: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
+    });
   }
 
   findAll() {
