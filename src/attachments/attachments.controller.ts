@@ -25,8 +25,8 @@ export class AttachmentsController {
   }
 
   @Get()
-  findAll() {
-    return this.attachmentsService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.attachmentsService.findAll(user);
   }
 
   @Get(':id')
