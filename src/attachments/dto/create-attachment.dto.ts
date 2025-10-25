@@ -1,4 +1,11 @@
-import { IsInt, IsPositive, IsString, IsUrl, Length, Max } from 'class-validator';
+import {
+  IsInt,
+  IsPositive,
+  IsString,
+  IsUrl,
+  Length,
+  Max,
+} from 'class-validator';
 
 export class CreateAttachmentDto {
   @IsString()
@@ -11,6 +18,6 @@ export class CreateAttachmentDto {
 
   @IsInt()
   @IsPositive()
-  @Max(50 * 1024 * 1024) // 50 MB limit (adjust as needed)
+  @Max(50 * 1024 * 1024)
   fileSize: number;
 }
