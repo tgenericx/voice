@@ -111,6 +111,7 @@ model Attachment {
   id           String     @id @default(cuid())
   fileName     String
   fileUrl      String
+  fileId       String
   fileSize     Int
   uploadedAt   DateTime   @default(now())
   uploadedById String
