@@ -33,6 +33,7 @@ export class ComplaintsService {
           data: data.attachments!.map((a) => ({
             fileName: a.fileName,
             fileUrl: a.fileUrl,
+            fileId: a.fileId,
             fileSize: a.fileSize,
             uploadedById: user.userId,
             complaintId: complaint.id,
@@ -80,6 +81,7 @@ export class ComplaintsService {
           data: attachments.map((a) => ({
             fileName: a.fileName,
             fileUrl: a.fileUrl,
+            fileId: a.fileId,
             fileSize: a.fileSize,
             uploadedById: user.userId,
             complaintId: id,

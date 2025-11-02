@@ -16,6 +16,9 @@ export class CreateAttachmentDto {
   @Length(1, 2048)
   fileUrl: string;
 
+  @IsString()
+  fileId: string;
+
   @IsInt()
   @IsPositive()
   @Max(50 * 1024 * 1024)
