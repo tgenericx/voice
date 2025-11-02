@@ -119,13 +119,6 @@ export class CloudinaryService {
         safeReject(error);
       });
 
-      uploadStream.on('error', (err: unknown) => {
-        const error = err instanceof Error ? err : new Error(String(err));
-        this.logger.error(`❌ Cloudinary stream error: ${error.message}`);
-        uploadStream.destroy(error);
-        safeReject(error);
-      });
-
       sourceStream.pipe(uploadStream);
     });
   }
