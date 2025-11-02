@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TokensModule } from './tokens/tokens.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AttachmentsModule } from './attachments/attachments.module';
     AuthModule,
     TokensModule,
     ComplaintsModule,
+    CloudinaryModule,
     AttachmentsModule,
   ],
   providers: [
