@@ -80,7 +80,7 @@ export class MediaController {
       },
     },
   })
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth('Bearer')
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(
