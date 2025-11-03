@@ -1,4 +1,5 @@
 import {
+  Inject,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -12,7 +13,7 @@ import { AccessTokenPayload, VerifiedToken } from 'src/auth/dto/auth.dto';
 export class TokenService {
   private readonly logger = new Logger(TokenService.name);
 
-  constructor(private readonly jwt: JwtService) {}
+  constructor(@Inject('ACCESS_JWT_SERVICE') private readonly jwt: JwtService) {}
 
   generateAccessToken(user: Pick<User, 'id' | 'role'>): string {
     try {
@@ -27,7 +28,7 @@ export class TokenService {
     }
   }
 
-  generateToken(user: Pick<User, 'id'>): string {
+  generateVerificationToken(user: Pick<User, 'id'>): string {
     try {
       const payload = {
         sub: user.id,
@@ -36,17 +37,28 @@ export class TokenService {
         expiresIn: '24h',
       });
     } catch (error) {
-      this.logger.error('Failed to generate access token', error);
-      throw new InternalServerErrorException('Failed to generate access token');
+      this.logger.error('Failed to generate token', error);
+      throw new InternalServerErrorException('Failed to generate token');
     }
   }
 
   verify<T = AccessTokenPayload>(token: string): VerifiedToken<T> {
     try {
       return this.jwt.verify(token);
-    } catch (error) {
-      this.logger.error('Token verification failed', error);
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.name === 'TokenExpiredError') {
+          throw new UnauthorizedException('Expired token');
+        } else if (error.name === 'JsonWebTokenError') {
+          throw new UnauthorizedException('Invalid token');
+        }
+
+        this.logger.error('Token verification failed', error);
+        throw new UnauthorizedException('Token verification error');
+      }
+
+      this.logger.error('Unknown token verification failure', error);
+      throw new UnauthorizedException('Token verification error');
     }
   }
 }
