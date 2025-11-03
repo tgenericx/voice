@@ -43,7 +43,9 @@ export const loadOrGenerateKeys = (
   }
 
   // 🛠️ 3️⃣ Generate new ones in <projectRoot>/secrets
-  logger.warn(`⚠️ No keys found for "${prefix}", generating under ${fallbackDir}`);
+  logger.warn(
+    `⚠️ No keys found for "${prefix}", generating under ${fallbackDir}`,
+  );
   generateAndSaveKeys(prefix, fallbackDir);
 
   return {

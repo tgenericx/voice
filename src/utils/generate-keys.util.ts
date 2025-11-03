@@ -5,43 +5,34 @@ import * as path from 'path';
 /**
  * Generates and saves RSA private and public keys.
  *
- * Keys are stored under:
- *   /etc/secrets/<subDir>/<prefix>private.pem
+ * Keys stored as:
+ *   <baseDir>/<prefix>-private.pem
+ *   <baseDir>/<prefix>-public.pem
  *
- * - Creates /etc/secrets if missing (when writable)
- * - Creates subdirectories as needed
- * - Does NOT overwrite existing keys unless force = true
+ * - Creates directory if missing
+ * - Does NOT overwrite unless force = true
  */
 export function generateAndSaveKeys(
-  prefix = '',
-  subDir = '',
+  prefix: string,
+  baseDir: string,
   force = false,
 ): void {
-  const secretsBase = '/etc/secrets';
-
   try {
-    if (!fs.existsSync(secretsBase)) {
-      fs.mkdirSync(secretsBase, { recursive: true });
-    }
+    fs.mkdirSync(baseDir, { recursive: true });
   } catch (err) {
-    console.warn(`⚠️ Could not create ${secretsBase}: ${err}`);
-  }
-
-  const targetDir = subDir ? path.join(secretsBase, subDir) : secretsBase;
-  try {
-    fs.mkdirSync(targetDir, { recursive: true });
-  } catch (err) {
-    console.error(`❌ Failed to create target directory ${targetDir}: ${err}`);
+    console.error(
+      `❌ Failed to create secrets directory at ${baseDir}: ${err}`,
+    );
     throw err;
   }
 
-  const privatePath = path.join(targetDir, `${prefix}private.pem`);
-  const publicPath = path.join(targetDir, `${prefix}public.pem`);
+  const privatePath = path.join(baseDir, `${prefix}-private.pem`);
+  const publicPath = path.join(baseDir, `${prefix}-public.pem`);
 
   if (!force && fs.existsSync(privatePath) && fs.existsSync(publicPath)) {
-    console.log('⚠️ Keys already exist, skipping generation.');
-    console.log(`🔐 Private Key: ${privatePath}`);
-    console.log(`🔓 Public Key:  ${publicPath}`);
+    console.log(
+      `⚠️ Keys already exist for prefix "${prefix}", skipping generation.`,
+    );
     return;
   }
 
@@ -54,7 +45,5 @@ export function generateAndSaveKeys(
   fs.writeFileSync(privatePath, privateKey, { mode: 0o600 });
   fs.writeFileSync(publicPath, publicKey);
 
-  console.log('✅ RSA keys generated successfully:');
-  console.log(`🔐 Private Key: ${privatePath}`);
-  console.log(`🔓 Public Key:  ${publicPath}`);
+  console.log(`✅ RSA keys generated for "${prefix}" in ${baseDir}`);
 }
