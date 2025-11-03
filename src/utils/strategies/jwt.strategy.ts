@@ -4,7 +4,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findRoot } from 'src/utils/find-root.util';
 import { AccessTokenPayload, AuthenticatedUser } from 'src/auth/dto/auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -14,19 +13,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {
-    const etcSecrets = '/etc/secrets';
-    let secretsBase: string;
+    const secretsBase = '/etc/secrets';
 
-    if (fs.existsSync(etcSecrets)) {
-      secretsBase = etcSecrets;
-    } else {
-      try {
-        fs.mkdirSync(etcSecrets, { recursive: true });
-        secretsBase = etcSecrets;
-      } catch {
-        const root = findRoot(process.cwd());
-        secretsBase = path.join(root, 'secrets');
+    try {
+      if (!fs.existsSync(secretsBase)) {
+        fs.mkdirSync(secretsBase, { recursive: true });
       }
+    } catch (err) {
+      console.warn(`⚠️ Failed to ensure ${secretsBase}: ${err}`);
     }
 
     const publicKeyPath = path.join(secretsBase, 'access', 'access-public.pem');
@@ -43,7 +37,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
     }
 
-    // === Initialize strategy ===
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey,
@@ -58,9 +51,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       select: { id: true, role: true },
     });
 
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    if (!user) throw new UnauthorizedException();
 
     return { userId: user.id, role: user.role };
   }
