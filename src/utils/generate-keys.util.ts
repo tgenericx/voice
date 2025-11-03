@@ -32,7 +32,7 @@ export function generateAndSaveKeys(
     fs.mkdirSync(targetDir, { recursive: true });
   } catch (err) {
     console.error(`❌ Failed to create target directory ${targetDir}: ${err}`);
-    return;
+    throw err;
   }
 
   const privatePath = path.join(targetDir, `${prefix}private.pem`);
