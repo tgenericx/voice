@@ -17,16 +17,13 @@ export const loadOrGenerateKeys = (
   const normalizedPrefix = prefix.replace(/-+$/, '');
   const secretsBase = '/etc/secrets';
 
-  try {
-    if (!fs.existsSync(secretsBase)) {
-      fs.mkdirSync(secretsBase, { recursive: true });
-    }
-  } catch (err) {
-    logger.error(`❌ Failed to ensure ${secretsBase}: ${err}`);
-  }
-
   const secretsDir = path.join(secretsBase, normalizedPrefix);
-  fs.mkdirSync(secretsDir, { recursive: true });
+  try {
+    fs.mkdirSync(secretsDir, { recursive: true });
+  } catch (err) {
+    logger.error(`❌ Failed to create secrets directory at ${secretsDir}: ${err}`);
+    throw err;
+  }
 
   const privatePath = path.join(secretsDir, `${normalizedPrefix}-private.pem`);
   const publicPath = path.join(secretsDir, `${normalizedPrefix}-public.pem`);
