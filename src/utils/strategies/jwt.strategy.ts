@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findRoot } from 'src/utils/find-root';
+import { findRoot } from 'src/utils/find-root.util';
 import { AccessTokenPayload, AuthenticatedUser } from 'src/auth/dto/auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
