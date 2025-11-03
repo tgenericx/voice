@@ -1,29 +1,29 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { loadOrGenerateKeys } from 'src/tokens/jwt/jwt-utils';
 import { AccessTokenPayload, AuthenticatedUser } from 'src/auth/dto/auth.dto';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(JwtStrategy.name);
+export class RefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
+  private readonly logger = new Logger(RefreshTokenStrategy.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
-  ) {
+  constructor(private readonly prisma: PrismaService) {
     const { publicKey } = loadOrGenerateKeys(
-      new Logger(JwtStrategy.name),
-      'access',
+      new Logger(RefreshTokenStrategy.name),
+      'refresh',
     );
 
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       secretOrKey: publicKey,
       algorithms: ['RS256'],
       ignoreExpiration: false,
+      passReqToCallback: false,
     });
   }
 
@@ -34,7 +34,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      this.logger.warn(`Unauthorized: user ${payload.sub} not found`);
+      this.logger.warn(
+        `Unauthorized: user ${payload.sub} not found for refresh`,
+      );
       throw new UnauthorizedException();
     }
 
