@@ -1,43 +1,38 @@
 import { generateKeyPairSync } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { findRoot } from './find-root.util';
 
 /**
  * Generates and saves RSA private and public keys.
  *
- * Keys are stored under one of:
- * - /etc/secrets/<subDir>/<prefix>private.pem  (default, container-safe)
- * - <project-root>/secrets/<subDir>/<prefix>private.pem (fallback)
+ * Keys are stored under:
+ *   /etc/secrets/<subDir>/<prefix>private.pem
  *
- * @param prefix - Optional prefix for filenames, e.g. 'access-' or 'refresh-'
- * @param subDir - Optional subdirectory under secrets (e.g. orgId or token type)
- * @param force  - If true overwrites existing keys
+ * - Creates /etc/secrets if missing (when writable)
+ * - Creates subdirectories as needed
+ * - Does NOT overwrite existing keys unless force = true
  */
 export function generateAndSaveKeys(
   prefix = '',
   subDir = '',
   force = false,
 ): void {
-  const etcSecrets = '/etc/secrets';
-  let secretsBase: string;
+  const secretsBase = '/etc/secrets';
 
-  if (fs.existsSync(etcSecrets)) {
-    secretsBase = etcSecrets;
-  } else {
-    try {
-      fs.mkdirSync(etcSecrets, { recursive: true });
-      secretsBase = etcSecrets;
-    } catch {
-      const root = findRoot(process.cwd());
-      secretsBase = path.join(root, 'secrets');
+  try {
+    if (!fs.existsSync(secretsBase)) {
+      fs.mkdirSync(secretsBase, { recursive: true });
     }
+  } catch (err) {
+    console.warn(`⚠️ Could not create ${secretsBase}: ${err}`);
   }
 
   const targetDir = subDir ? path.join(secretsBase, subDir) : secretsBase;
-
-  if (!fs.existsSync(targetDir)) {
+  try {
     fs.mkdirSync(targetDir, { recursive: true });
+  } catch (err) {
+    console.error(`❌ Failed to create target directory ${targetDir}: ${err}`);
+    return;
   }
 
   const privatePath = path.join(targetDir, `${prefix}private.pem`);
@@ -52,14 +47,8 @@ export function generateAndSaveKeys(
 
   const { privateKey, publicKey } = generateKeyPairSync('rsa', {
     modulusLength: 2048,
-    publicKeyEncoding: {
-      type: 'pkcs1',
-      format: 'pem',
-    },
-    privateKeyEncoding: {
-      type: 'pkcs1',
-      format: 'pem',
-    },
+    publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs1', format: 'pem' },
   });
 
   fs.writeFileSync(privatePath, privateKey, { mode: 0o600 });
