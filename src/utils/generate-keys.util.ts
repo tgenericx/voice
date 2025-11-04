@@ -4,35 +4,19 @@ import * as path from 'path';
 
 /**
  * Generates and saves RSA private and public keys.
- *
- * Keys stored as:
- *   <baseDir>/<prefix>-private.pem
- *   <baseDir>/<prefix>-public.pem
- *
- * - Creates directory if missing
- * - Does NOT overwrite unless force = true
+ * Keys are always named "<prefix>-private.pem" and "<prefix>-public.pem".
+ * Creates directory if missing, never overwrites unless force = true.
  */
-export function generateAndSaveKeys(
-  prefix: string,
-  baseDir: string,
-  force = false,
-): void {
-  try {
-    fs.mkdirSync(baseDir, { recursive: true });
-  } catch (err) {
-    console.error(
-      `❌ Failed to create secrets directory at ${baseDir}: ${err}`,
-    );
-    throw err;
-  }
+export function generateAndSaveKeys(prefix: string, baseDir: string, force = false): void {
+  prefix = prefix.trim().replace(/-+$/, '');
+
+  fs.mkdirSync(baseDir, { recursive: true });
 
   const privatePath = path.join(baseDir, `${prefix}-private.pem`);
   const publicPath = path.join(baseDir, `${prefix}-public.pem`);
 
   if (!force && fs.existsSync(privatePath) && fs.existsSync(publicPath)) {
-    console.log(
-      `⚠️ Keys already exist for prefix "${prefix}", skipping generation.`,
-    );
+    console.log(`⚠️ Keys already exist for "${prefix}", skipping generation.`);
     return;
   }
 
