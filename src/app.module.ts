@@ -9,6 +9,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ComplaintsModule,
     CloudinaryModule,
     AttachmentsModule,
+    MessagesModule,
   ],
   providers: [
     {
