@@ -35,12 +35,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  complaints    Complaint[]
-  refreshTokens RefreshToken[]
-  messages      Message[]
-  attachments   Attachment[]
-  notifications Notification[]
-  timeline      TimelineEvent[]
+  complaints      Complaint[]
+  refreshTokens   RefreshToken[]
+  messages        Message[]
+  attachments     Attachment[]
+  notifications   Notification[]
+  timeline        TimelineEvent[]
+  academicProfile AcademicProfile?
 }
 
 model RefreshToken {
@@ -144,4 +145,39 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model Faculty {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  code        String?           @unique
+  departments Department[]
+  profiles    AcademicProfile[]
+}
+
+model Department {
+  id        String            @id @default(cuid())
+  name      String
+  code      String            @unique
+  facultyId String
+  faculty   Faculty           @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  profiles  AcademicProfile[]
+}
+
+model AcademicProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  facultyId    String
+  faculty      Faculty    @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  level     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([facultyId])
+  @@index([departmentId])
 }
