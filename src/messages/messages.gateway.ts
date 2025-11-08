@@ -1,15 +1,24 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+} from '@nestjs/websockets';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
+import { CurrentUser } from 'src/utils/decorators';
+import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
 
 @WebSocketGateway()
 export class MessagesGateway {
   constructor(private readonly messagesService: MessagesService) {}
 
   @SubscribeMessage('createMessage')
-  create(@MessageBody() createMessageDto: CreateMessageDto) {
-    return this.messagesService.create(createMessageDto);
+  create(
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.messagesService.create(createMessageDto, user);
   }
 
   @SubscribeMessage('findAllMessages')
@@ -18,17 +27,24 @@ export class MessagesGateway {
   }
 
   @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
+  findOne(@MessageBody() id: string) {
     return this.messagesService.findOne(id);
   }
 
   @SubscribeMessage('updateMessage')
-  update(@MessageBody() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(updateMessageDto.id, updateMessageDto);
+  update(
+    @MessageBody() updateMessageDto: UpdateMessageDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.messagesService.update(
+      updateMessageDto.id,
+      updateMessageDto,
+      user,
+    );
   }
 
   @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
+  remove(@MessageBody() id: string) {
     return this.messagesService.remove(id);
   }
 }
