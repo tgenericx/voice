@@ -8,7 +8,10 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { CurrentUser } from 'src/utils/decorators';
 import { AuthenticatedUser } from 'src/auth/dto/auth.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/utils/guards';
 
+@UseGuards(JwtAuthGuard)
 @WebSocketGateway()
 export class MessagesGateway {
   constructor(private readonly messagesService: MessagesService) {}
