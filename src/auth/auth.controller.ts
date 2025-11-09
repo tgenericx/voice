@@ -8,6 +8,8 @@ import {
   ForbiddenException,
   Get,
   Req,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,8 +30,14 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  create(@Body() createUserDto: CreateUserDto): Promise<AuthPayload> {
-    return this.authService.create(createUserDto);
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<AuthPayload> {
+    if (!file) {
+      throw new BadRequestException('No files uploaded');
+    }
+    return this.authService.create(createUserDto, file);
   }
 
   @Post('login')
@@ -39,7 +47,10 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
-  refresh(@Body('refreshToken') refreshToken: string, @Req() req): Promise<AuthPayload> {
+  refresh(
+    @Body('refreshToken') refreshToken: string,
+    @Req() req,
+  ): Promise<AuthPayload> {
     return this.authService.refreshToken(refreshToken);
   }
 

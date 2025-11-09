@@ -13,6 +13,7 @@ import { RefreshTokenService } from 'src/tokens/refresh-token.service';
 import { AuthPayload } from './dto/auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class AuthService {
@@ -21,12 +22,20 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
     private readonly refreshTokenService: RefreshTokenService,
+    private readonly cloudinary: CloudinaryService,
   ) {}
 
-  async create(userData: CreateUserDto): Promise<AuthPayload> {
+  async create(
+    userData: CreateUserDto,
+    file: Express.Multer.File,
+  ): Promise<AuthPayload> {
     if (userData.role && userData.role === Role.ADMIN) {
       throw new ForbiddenException(`Cannot self-assign ${Role.ADMIN} role`);
     }
+    const upload = await this.cloudinary.uploadFile({
+      file,
+      folder: 'avatars',
+    });
 
     const hashedPassword = await argon2.hash(userData.password);
 
@@ -35,6 +44,7 @@ export class AuthService {
         ...userData,
         password: hashedPassword,
         role: userData.role ? userData.role : Role.STUDENT,
+        avatar: upload.secure_url,
       },
     });
     const accessToken = this.tokenService.generateAccessToken(user);
