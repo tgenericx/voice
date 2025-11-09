@@ -8,7 +8,11 @@ import { JwtAuthGuard, RefreshTokenGuard } from 'src/utils/guards';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaModule, TokensModule],
+  imports: [
+    PrismaModule,
+    TokensModule,
+    CloudinaryModule,
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -16,7 +20,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
     JwtAuthGuard,
     RefreshTokenStrategy,
     RefreshTokenGuard,
-    CloudinaryModule,
   ],
 })
 export class AuthModule {}
